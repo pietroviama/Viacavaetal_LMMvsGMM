@@ -1,0 +1,582 @@
+---
+title: "LMMvsGMM"
+author: "PViacava"
+date: "15/02/2021"
+output: html_document
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_knit$set(root.dir = '../Viacavaetal_LMMvsGMM/Data', echo = FALSE)
+
+#load libraries
+
+library(MASS)
+library(ggplot2)
+library(geomorph)
+library(klaR)
+library(EnvStats)
+
+
+```
+
+
+```{r, load data and perform gpa for gmm data, include=FALSE}
+#Import 3D coordinates from all specimens
+coords.3D <- t (read.csv("C:/Users/pietro/Desktop/Pietro/Projects/Viacavaetal_Antechinus/Data/Antechinus_semiLMcoords.csv", header = TRUE, row.names = 1))
+dim(coords.3D)
+
+#Convert 2D metadata into a 3D array
+A <- arrayspecs(coords.3D, 412, 3)
+dim(A)
+Ahead <- head(dimnames(A))[3]
+
+#Load the classifier
+antechinusdata <- read.csv("C:/Users/pietro/Desktop/Pietro/Projects/Viacavaetal_Antechinus/Data/Antechinus_data.csv", header=T)
+dim(antechinusdata)
+Data.species <- antechinusdata$Species
+is.factor(Data.species) # check that it is a factor
+
+
+#give museum ID row names to antechinus data
+rownames(antechinusdata)<-antechinusdata$ID
+
+####Rearrange coordinate names and classifier file names in the same order
+
+names_array <- dimnames(A)[[3]]
+names_classifier <- rownames(antechinusdata)
+match(names_array, names_classifier)
+A_reorder <- A[,,match(names_classifier, names_array)]
+
+names_Areorder <- dimnames(A_reorder)[[3]]
+match(names_Areorder, names_classifier)
+
+#CLEANED VERY ROUGHLY, RECHECK SPECIMENS THAT CAN BE INCLUDED IN THE ANALYSIS
+A_reorder <- A_reorder[,,-c(which(antechinusdata$Age=="Juvenile?"), which(antechinusdata$Population=="adustus?"), which(antechinusdata$Population=="agilis?"), which(antechinusdata$ID=="CM3642"))]
+
+antechinusdata <- antechinusdata[-c(which(antechinusdata$Age=="Juvenile?"), which(antechinusdata$Population=="adustus?"), which(antechinusdata$Population=="agilis?"), which(antechinusdata$ID=="CM3642")),]
+antechinusdata <- droplevels(antechinusdata)
+
+#####DO THAT######
+
+
+gpaall<-gpagen(A_reorder, curves = NULL, surfaces = NULL, PrinAxes = TRUE,
+               max.iter = NULL, ProcD = TRUE, Proj = TRUE, print.progress = TRUE)
+
+
+gpa2d <- two.d.array(gpaall$coords)
+
+```
+
+
+```{r, extraction of linear measurements, include=FALSE}
+
+
+vandyck2000 <- data.frame(bl = (interlmkdist(A_reorder,c(6,10))), 
+                          pl = (interlmkdist(A_reorder,c(7,10))), 
+                          p1_3 = (interlmkdist(A_reorder,c(25,27)) + interlmkdist(A_reorder,c(26,28)))/2,
+                          swr_lc1a = (interlmkdist(A_reorder,c(25,26))),
+                          c1m4 = (interlmkdist(A_reorder,c(25,37)) + interlmkdist(A_reorder,c(26,38)))/2,
+                          ipvl = (interlmkdist(A_reorder,c(77,79)) + interlmkdist(A_reorder,c(78,80)))/2,
+                          swr_lm3 = (interlmkdist(A_reorder,c(41,42))),
+                          tc = (interlmkdist(A_reorder,c(67,68)) + interlmkdist(A_reorder,c(69,70)))/2,
+                          ibw = (interlmkdist(A_reorder,c(65,66))),
+                          obw = (interlmkdist(A_reorder,c(45,46))),
+                          apvl = (interlmkdist(A_reorder,c(79,81)) + interlmkdist(A_reorder,c(80,82)))/2,
+                          ppvl = (interlmkdist(A_reorder,c(75,77)) + interlmkdist(A_reorder,c(76,78)))/2,
+                          m1_4 = (interlmkdist(A_reorder,c(27,37)) + interlmkdist(A_reorder,c(28,38)))/2)
+
+gmeansvd00 <- apply(vandyck2000, 1, geoMean) #calculation of the geometric mean for each specimen
+
+shaperatio.vd00 <- log(vandyck2000/gmeansvd00)#freeing size with calculation of shape ratios
+
+sizefree_dfvd00 <- data.frame(shaperatio.vd00, Population=antechinusdata$Population, ID=antechinusdata$ID) #integration into a dataframe with information on population ID
+
+
+
+dickman1998 <- data.frame(con = (interlmkdist(A_reorder,c(6,10))), 
+                          pal = (interlmkdist(A_reorder,c(7,10))), 
+                          p1_3 = (interlmkdist(A_reorder,c(25,27)) + interlmkdist(A_reorder,c(26,28)))/2,
+                          swc = (interlmkdist(A_reorder,c(25,26))),
+                          c1m4 = (interlmkdist(A_reorder,c(25,37)) + interlmkdist(A_reorder,c(26,38)))/2,
+                          m1_4 = (interlmkdist(A_reorder,c(27,37)) + interlmkdist(A_reorder,c(28,38)))/2,
+                          ipd = (interlmkdist(A_reorder,c(77,79)) + interlmkdist(A_reorder,c(78,80)))/2,
+                          swm3 = (interlmkdist(A_reorder,c(41,42))),
+                          aw = (interlmkdist(A_reorder,c(71,72))),
+                          tcd = (interlmkdist(A_reorder,c(67,68)) + interlmkdist(A_reorder,c(69,70)))/2,
+                          ibw = (interlmkdist(A_reorder,c(65,66))),
+                          obm = (interlmkdist(A_reorder,c(45,46))),
+                          pns = (interlmkdist(A_reorder,c(11,17)) + interlmkdist(A_reorder,c(12,18)))/2,
+                          nwi = (interlmkdist(A_reorder,c(11,12))),
+                          nl = (interlmkdist(A_reorder,c(1,2))),
+                          now = (interlmkdist(A_reorder,c(19,20))),
+                          gl = (interlmkdist(A_reorder,c(4,10))),
+                          apv = (interlmkdist(A_reorder,c(79,81)) + interlmkdist(A_reorder,c(80,82)))/2,
+                          ppv = (interlmkdist(A_reorder,c(75,77)) + interlmkdist(A_reorder,c(76,78)))/2,
+                          fmh = (interlmkdist(A_reorder,c(5,6))),
+                          fmw = (interlmkdist(A_reorder,c(55,56))))
+                          
+
+gmeansd98 <- apply(dickman1998, 1, geoMean) #calculation of the geometric mean for each specimen
+
+shaperatio.d98 <- log(dickman1998/gmeansd98) #freeing size with calculation of shape ratios
+
+sizefree_dfd98 <- data.frame(shaperatio.d98, Population=antechinusdata$Population, ID=antechinusdata$ID) #integration into a dataframe with information on population ID
+
+
+
+baker2013 <- data.frame(ht_b = (sqrt(interlmkdist(A_reorder,c(3,69))^2 - ((interlmkdist(A_reorder,c(69,70)))/2)^2)), 
+                       uml = (interlmkdist(A_reorder,c(27,37)) + interlmkdist(A_reorder,c(28,38)))/2,
+                       upl = (interlmkdist(A_reorder,c(25,27)) + interlmkdist(A_reorder,c(26,28)))/2,
+                       pml = (sqrt(interlmkdist(A_reorder,c(10,17))^2 - ((interlmkdist(A_reorder,c(17,18)))/2)^2)),
+                       I1_P3 = (interlmkdist(A_reorder,c(10,27)) + interlmkdist(A_reorder,c(10,28)))/2,
+                       nw = (interlmkdist(A_reorder,c(17,18))),
+                       nwr = (interlmkdist(A_reorder,c(19,20))),
+                       apv = (interlmkdist(A_reorder,c(79,81)) + interlmkdist(A_reorder,c(80,82)))/2,
+                       ipv = (interlmkdist(A_reorder,c(77,79)) + interlmkdist(A_reorder,c(78,80)))/2,
+                       ppv = (interlmkdist(A_reorder,c(75,77)) + interlmkdist(A_reorder,c(76,78)))/2,
+                       pl = (interlmkdist(A_reorder,c(7,10))),
+                       bl = (interlmkdist(A_reorder,c(6,10))),
+                       tc = (interlmkdist(A_reorder,c(67,68)) + interlmkdist(A_reorder,c(69,70)))/2,
+                       ibw = (interlmkdist(A_reorder,c(65,66))),
+                       R_LC1 = (interlmkdist(A_reorder,c(25,26))),
+                       R_LM1T = (interlmkdist(A_reorder,c(27,28))),
+                       R_LM3 = (interlmkdist(A_reorder,c(41,42))),
+                       OBW = (interlmkdist(A_reorder,c(45,46))))
+
+
+gmeansb13 <- apply(baker2013, 1, geoMean) #calculation of the geometric mean for each specimen
+
+shaperatio.b13 <- log(baker2013/gmeansb13) #freeing size with calculation of shape ratios
+
+sizefree_dfb13 <- data.frame(shaperatio.b13, Population=antechinusdata$Population, ID=antechinusdata$ID) #integration into a dataframe with information on population ID
+
+
+
+
+travouillon2016 <- data.frame(onl = (interlmkdist(A_reorder,c(1,4))),
+                              nl = (interlmkdist(A_reorder,c(2,10))),
+                              anw = (interlmkdist(A_reorder,c(11,12))),
+                              nps = (interlmkdist(A_reorder,c(11,17)) + interlmkdist(A_reorder,c(12,18)))/2,
+                              pnw = (interlmkdist(A_reorder,c(19,20))),
+                              rwi = (interlmkdist(A_reorder,c(29,31)) + interlmkdist(A_reorder,c(30,32)))/2,
+                              fs = (interlmkdist(A_reorder,c(2,3))),
+                              ppw = (interlmkdist(A_reorder,c(23,24))),
+                              bcl = (interlmkdist(A_reorder,c(5,10))),
+                              il = (interlmkdist(A_reorder,c(10,15)) + interlmkdist(A_reorder,c(10,16)))/2,
+                              apw = (interlmkdist(A_reorder,c(79,80)) + interlmkdist(A_reorder,c(81,82)))/2,
+                              apl = (interlmkdist(A_reorder,c(79,81)) + interlmkdist(A_reorder,c(80,82)))/2,
+                              rwc = (interlmkdist(A_reorder,c(25,26))),
+                              upr = (interlmkdist(A_reorder,c(25,27)) + interlmkdist(A_reorder,c(26,28)))/2,
+                              ctl = (interlmkdist(A_reorder,c(25,37)) + interlmkdist(A_reorder,c(26,38)))/2,
+                              umr = (interlmkdist(A_reorder,c(27,37)) + interlmkdist(A_reorder,c(28,38)))/2,
+                              op3 = (interlmkdist(A_reorder,c(27,28))),
+                              ppl = (interlmkdist(A_reorder,c(75,77)) + interlmkdist(A_reorder,c(76,78)))/2,
+                              bol = (interlmkdist(A_reorder,c(61,65)) + interlmkdist(A_reorder,c(62,66)))/2,
+                              mw = (interlmkdist(A_reorder,c(47,49))),
+                              pow = (interlmkdist(A_reorder,c(59,60))),
+                              cw = (interlmkdist(A_reorder,c(57,58))))
+
+gmeanst16 <- apply(travouillon2016, 1, geoMean) #calculation of the geometric mean for each specimen
+
+shaperatio.t16 <- log(travouillon2016/gmeanst16) #freeing size with calculation of shape ratios
+
+sizefree_dft16 <- data.frame(shaperatio.t16, Population=antechinusdata$Population, ID=antechinusdata$ID) #integration into a dataframe with information on population ID
+
+
+
+#consensus protocol is really van dyck & crowther, 2000 minus c1m4, not measured by baker, 2013. travouillon, 2016 is not taken into account for this consensus because it was the least similar.
+
+consensuslms <- data.frame(bl = (interlmkdist(A_reorder,c(6,10))), 
+                          pl = (interlmkdist(A_reorder,c(7,10))), 
+                          p1_3 = (interlmkdist(A_reorder,c(25,27)) + interlmkdist(A_reorder,c(26,28)))/2,
+                          swr_lc1a = (interlmkdist(A_reorder,c(25,26))),
+                          ipvl = (interlmkdist(A_reorder,c(77,79)) + interlmkdist(A_reorder,c(78,80)))/2,
+                          swr_lm3 = (interlmkdist(A_reorder,c(41,42))),
+                          tc = (interlmkdist(A_reorder,c(67,68)) + interlmkdist(A_reorder,c(69,70)))/2,
+                          ibw = (interlmkdist(A_reorder,c(65,66))),
+                          obw = (interlmkdist(A_reorder,c(45,46))),
+                          apvl = (interlmkdist(A_reorder,c(79,81)) + interlmkdist(A_reorder,c(80,82)))/2,
+                          ppvl = (interlmkdist(A_reorder,c(75,77)) + interlmkdist(A_reorder,c(76,78)))/2,
+                          m1_4 = (interlmkdist(A_reorder,c(27,37)) + interlmkdist(A_reorder,c(28,38)))/2)
+                          
+
+gmeanscon <- apply(consensuslms, 1, geoMean) #calculation of the geometric mean for each specimen
+
+shaperatio.con <- log(consensuslms/gmeanscon) #freeing size with calculation of shape ratios
+
+sizefree_dfcon <- data.frame(shaperatio.con, Population=antechinusdata$Population, ID=antechinusdata$ID) #integration into a dataframe with information on population ID
+
+  
+```
+
+```{r, lda rda predictions and uschi classification performance measures, include = FALSE}
+  
+#LDA, RDA, predictions and USCHI performance
+
+#For Van Dyck, 2000
+
+#########
+
+PCAvd00 <- prcomp(sizefree_dfvd00.x.pop[,1:13])
+summary(PCAvd00) #determine the number of PCs to be used (95% of cumulative proportion)
+
+PCvd00 <- as.matrix(PCAvd00$x) 
+
+PCvd00$Population <- sizefree_dfvd00.x.pop[,14]
+
+modelsizefree_dfvd00 <- lda(Population~., data = sizefree_dfvd00.x.pop, prior = c(1,1,1)/3, CV = TRUE)
+modelsizefree_dfvd00
+
+##########
+  
+sizefree_dfvd00.x <- subset(sizefree_dfvd00, select = - ID)
+sizefree_dfvd00.x.pop <- sizefree_dfvd00.x[-c(which(sizefree_dfvd00.x$Population=="?")),]
+modelsizefree_dfvd00 <- lda(Population~., data = sizefree_dfvd00.x.pop, prior = c(1,1,1)/3, CV = TRUE)
+modelsizefree_dfvd00
+
+dfintlmlda.popx.sizefree_dfvd00 <- sizefree_dfvd00.x[-c(which(sizefree_dfvd00.x$Population=="subtropicus"), which(sizefree_dfvd00.x$Population=="south"), which(sizefree_dfvd00.x$Population=="north")),]
+predsizefree_dfvd00.lda <- predict(modelsizefree_dfvd00, dfintlmlda.popx.sizefree_dfvd00)$class
+
+rda.sizefree_dfvd00 <- rda(Population ~ ., data=sizefree_dfvd00.x.pop, crossval=TRUE, prior = 1)
+predsizefree_dfvd00.rda <- predict(rda.sizefree_dfvd00, sizefree_dfvd00.x.pop)
+predsizefree_dfvd00.rda.x <- predict(rda.sizefree_dfvd00, dfintlmlda.popx.sizefree_dfvd00)
+
+attr.sizefree_dfvd00 <- list(dim = c(136,3), dimnames = list(as.character(1:136), c("north", "south", "subtropicus") ))
+attributes(predsizefree_dfvd00.rda$posterior) <- attr.sizefree_dfvd00
+
+attr2.sizefree_dfvd00 <- list(levels = c("north", "south", "subtropicus"), class ="factor")
+attributes(sizefree_dfvd00.x.pop$Population) <- attr2.sizefree_dfvd00
+factor.sizefree_dfvd00 <- as.factor(sizefree_dfvd00.x.pop$Population)
+
+ucpm.sizefree_dfvd00.rda <- ucpm(predsizefree_dfvd00.rda$posterior, factor.sizefree_dfvd00)
+ucpm.sizefree_dfvd00.rda
+
+ucpm.sizefree_dfvd00.lda <- ucpm(modelsizefree_dfvd00$posterior, factor.sizefree_dfvd00)
+ucpm.sizefree_dfvd00.lda
+
+#For Dickman, 1998
+
+sizefree_dfd98.x <- subset(sizefree_dfd98, select = - ID)
+sizefree_dfd98.x.pop <- sizefree_dfd98.x[-c(which(sizefree_dfd98.x$Population=="?")),]
+modelsizefree_dfd98 <- lda(Population~., data = sizefree_dfd98.x.pop, prior = c(1,1,1)/3, CV = TRUE)
+modelsizefree_dfd98
+
+dfintlmlda.popx.sizefree_dfd98 <- sizefree_dfd98.x[-c(which(sizefree_dfd98.x$Population=="subtropicus"), which(sizefree_dfd98.x$Population=="south"), which(sizefree_dfd98.x$Population=="north")),]
+predsizefree_dfd98.lda <- predict(modelsizefree_dfd98, dfintlmlda.popx.sizefree_dfd98)$class
+
+rda.sizefree_dfd98 <- rda(Population ~ ., data=sizefree_dfd98.x.pop, crossval=TRUE, prior = 1)
+predsizefree_dfd98.rda <- predict(rda.sizefree_dfd98, sizefree_dfd98.x.pop)
+predsizefree_dfd98.rda.x <- predict(rda.sizefree_dfd98, dfintlmlda.popx.sizefree_dfd98)
+
+attr.sizefree_dfd98 <- list(dim = c(136,3), dimnames = list(as.character(1:136), c("north", "south", "subtropicus") ))
+attributes(predsizefree_dfd98.rda$posterior) <- attr.sizefree_dfd98
+
+attr2.sizefree_dfd98 <- list(levels = c("north", "south", "subtropicus"), class ="factor")
+attributes(sizefree_dfd98.x.pop$Population) <- attr2.sizefree_dfd98
+factor.sizefree_dfd98 <- as.factor(sizefree_dfd98.x.pop$Population)
+
+ucpm.sizefree_dfd98.rda <- ucpm(predsizefree_dfd98.rda$posterior, factor.sizefree_dfd98)
+ucpm.sizefree_dfd98.rda
+
+ucpm.sizefree_dfd98.lda <- ucpm(modelsizefree_dfd98$posterior, factor.sizefree_dfd98)
+ucpm.sizefree_dfd98.lda
+
+#For Baker, 2013
+
+sizefree_dfb13.x <- subset(sizefree_dfb13, select = - ID)
+sizefree_dfb13.x.pop <- sizefree_dfb13.x[-c(which(sizefree_dfb13.x$Population=="?")),]
+modelsizefree_dfb13 <- lda(Population~., data = sizefree_dfb13.x.pop, prior = c(1,1,1)/3, CV = TRUE)
+modelsizefree_dfb13
+
+dfintlmlda.popx.sizefree_dfb13 <- sizefree_dfb13.x[-c(which(sizefree_dfb13.x$Population=="subtropicus"), which(sizefree_dfb13.x$Population=="south"), which(sizefree_dfb13.x$Population=="north")),]
+predsizefree_dfb13.lda <- predict(modelsizefree_dfb13, dfintlmlda.popx.sizefree_dfb13)$class
+
+rda.sizefree_dfb13 <- rda(Population ~ ., data=sizefree_dfb13.x.pop, crossval=TRUE, prior = 1)
+predsizefree_dfb13.rda <- predict(rda.sizefree_dfb13, sizefree_dfb13.x.pop)
+predsizefree_dfb13.rda.x <- predict(rda.sizefree_dfb13, dfintlmlda.popx.sizefree_dfb13)
+
+attr.sizefree_dfb13 <- list(dim = c(136,3), dimnames = list(as.character(1:136), c("north", "south", "subtropicus") ))
+attributes(predsizefree_dfb13.rda$posterior) <- attr.sizefree_dfb13
+
+attr2.sizefree_dfb13 <- list(levels = c("north", "south", "subtropicus"), class ="factor")
+attributes(sizefree_dfb13.x.pop$Population) <- attr2.sizefree_dfb13
+factor.sizefree_dfb13 <- as.factor(sizefree_dfb13.x.pop$Population)
+
+ucpm.sizefree_dfb13.rda <- ucpm(predsizefree_dfb13.rda$posterior, factor.sizefree_dfb13)
+ucpm.sizefree_dfb13.rda
+
+ucpm.sizefree_dfb13.lda <- ucpm(modelsizefree_dfb13$posterior, factor.sizefree_dfb13)
+ucpm.sizefree_dfb13.lda
+
+#For Travouillon, 2016
+
+sizefree_dft16.x <- subset(sizefree_dft16, select = - ID)
+sizefree_dft16.x.pop <- sizefree_dft16.x[-c(which(sizefree_dft16.x$Population=="?")),]
+modelsizefree_dft16 <- lda(Population~., data = sizefree_dft16.x.pop, prior = c(1,1,1)/3, CV = TRUE)
+modelsizefree_dft16
+
+dfintlmlda.popx.sizefree_dft16 <- sizefree_dft16.x[-c(which(sizefree_dft16.x$Population=="subtropicus"), which(sizefree_dft16.x$Population=="south"), which(sizefree_dft16.x$Population=="north")),]
+predsizefree_dft16.lda <- predict(modelsizefree_dft16, dfintlmlda.popx.sizefree_dft16)$class
+
+rda.sizefree_dft16 <- rda(Population ~ ., data=sizefree_dft16.x.pop, crossval=TRUE, prior = 1)
+predsizefree_dft16.rda <- predict(rda.sizefree_dft16, sizefree_dft16.x.pop)
+predsizefree_dft16.rda.x <- predict(rda.sizefree_dft16, dfintlmlda.popx.sizefree_dft16)
+
+attr.sizefree_dft16 <- list(dim = c(136,3), dimnames = list(as.character(1:136), c("north", "south", "subtropicus") ))
+attributes(predsizefree_dft16.rda$posterior) <- attr.sizefree_dft16
+
+attr2.sizefree_dft16 <- list(levels = c("north", "south", "subtropicus"), class ="factor")
+attributes(sizefree_dft16.x.pop$Population) <- attr2.sizefree_dft16
+factor.sizefree_dft16 <- as.factor(sizefree_dft16.x.pop$Population)
+
+ucpm.sizefree_dft16.rda <- ucpm(predsizefree_dft16.rda$posterior, factor.sizefree_dft16)
+ucpm.sizefree_dft16.rda
+
+ucpm.sizefree_dft16.lda <- ucpm(modelsizefree_dft16$posterior, factor.sizefree_dft16)
+ucpm.sizefree_dft16.lda
+
+#for consensus
+
+sizefree_dfcon.x <- subset(sizefree_dfcon, select = - ID)
+sizefree_dfcon.x.pop <- sizefree_dfcon.x[-c(which(sizefree_dfcon.x$Population=="?")),]
+modelsizefree_dfcon <- lda(Population~., data = sizefree_dfcon.x.pop, prior = c(1,1,1)/3, CV = TRUE)
+modelsizefree_dfcon
+
+dfintlmlda.popx.sizefree_dfcon <- sizefree_dfcon.x[-c(which(sizefree_dfcon.x$Population=="subtropicus"), which(sizefree_dfcon.x$Population=="south"), which(sizefree_dfcon.x$Population=="north")),]
+predsizefree_dfcon.lda <- predict(modelsizefree_dfcon, dfintlmlda.popx.sizefree_dfcon)$class
+
+rda.sizefree_dfcon <- rda(Population ~ ., data=sizefree_dfcon.x.pop, crossval=TRUE, prior = 1)
+predsizefree_dfcon.rda <- predict(rda.sizefree_dfcon, sizefree_dfcon.x.pop)
+predsizefree_dfcon.rda.x <- predict(rda.sizefree_dfcon, dfintlmlda.popx.sizefree_dfcon)
+
+attr.sizefree_dfcon <- list(dim = c(136,3), dimnames = list(as.character(1:136), c("north", "south", "subtropicus") ))
+attributes(predsizefree_dfcon.rda$posterior) <- attr.sizefree_dfcon
+
+attr2.sizefree_dfcon <- list(levels = c("north", "south", "subtropicus"), class ="factor")
+attributes(sizefree_dfcon.x.pop$Population) <- attr2.sizefree_dfcon
+factor.sizefree_dfcon <- as.factor(sizefree_dfcon.x.pop$Population)
+
+ucpm.sizefree_dfcon.rda <- ucpm(predsizefree_dfcon.rda$posterior, factor.sizefree_dfcon)
+ucpm.sizefree_dfcon.rda
+
+ucpm.sizefree_dfcon.lda <- ucpm(modelsizefree_dfcon$posterior, factor.sizefree_dfcon)
+ucpm.sizefree_dfcon.lda
+
+
+#Now, for GMM comparison with LMM, we had to perform a PCA and take 95% of PC scores to reduce dimensionality. Still need to figure out why RDA and LDA throw different results and why RDA here only works with 62 PCs. 
+
+#load data of specimens with known population
+
+A_reorderpop <- A_reorder[,,-c(which(antechinusdata$Population=="?"), which(antechinusdata$Population=="subtropicus holotype"))]
+
+antechinusdatapop <- antechinusdata[-c(which(antechinusdata$Population=="?"), which(antechinusdata$Population=="subtropicus holotype")),]
+antechinusdatapop <- droplevels(antechinusdatapop)
+
+
+gpaallpop<-gpagen(A_reorderpop, curves = NULL, surfaces = NULL, PrinAxes = TRUE,
+                   max.iter = NULL, ProcD = TRUE, Proj = TRUE, print.progress = TRUE)
+
+#transformation of the shape data to a 2d array
+
+gpaall2d <- two.d.array(gpaallpop$coords)
+
+#PC reduction
+
+#AVOID PCA STEP BY USING FIXED LMS
+
+PCA2d <- prcomp(gpaall2d)
+summary(PCA2d) #determine the number of PCs to be used (95% of cumulative proportion)
+
+PCredante <- as.matrix(PCA2d$x[,1:120]) 
+
+#FOR SOME REASON, WHEN I WANT TO USE 110 PC SCORES, THE LDA FINDS MISSING VALUES IN M6945 AND IF I ADD MORE PC SCORES, MORE SPECIMENS WILL APPEAR WITH MISSING VALUES.
+
+
+#LDA
+
+Ldagmmante <- lda(PCredante, antechinusdatapop$Population, prior = c(1,1,1)/3, CV = TRUE)
+Ldagmmante
+
+#RDA
+popfactor.gmmante <- as.factor(antechinusdatapop$Population)
+dfgmmante <- data.frame(gpaall2d, Population=antechinusdatapop$Population)
+
+gl <- expand.grid(gamma=seq(0,0.1, length.out=20), lambda=seq(0,0.1, length.out=20))
+res <-vector(mode="numeric", length=nrow(gl))
+
+
+for (i in 1:nrow(gl)) {
+    
+    fit <- rda(Population ~., data=dfgmmante, gamma=gl$gamma[i], lambda=gl$lambda[i])
+    res[i] <- fit$error.rate
+    }
+  which.min(res)
+  
+gl[1,]
+
+rda.gmmante <- rda(Population ~., data=dfgmmante, crossval=TRUE, prior = 1, gamma = gl[1,1], lambda = gl[1,2])
+rda.gmmante
+predgmmante.rda <- predict(rda.gmmante, dfgmmante)
+
+
+attr.gmmante <- list(dim = c(136,3), dimnames = list(as.character(1:136), c("north", "south", "subtropicus") ))
+attributes(predgmmante.rda$posterior) <- attr.gmmante
+
+attr2.gmmante <- list(levels = c("north", "south", "subtropicus"), class ="factor")
+attributes(antechinusdatapop$Population) <- attr2.gmmante
+
+ucpm.gmmante.rda <- ucpm(predgmmante.rda$posterior, popfactor.gmmante)
+ucpm.gmmante.rda
+
+ucpm.gmmante.lda <- ucpm(Ldagmmante$posterior, popfactor.gmmante)
+ucpm.gmmante.lda
+
+
+```
+
+```{r, PCAs, include = FALSE}
+
+#PCAs
+
+
+selectPCs <- function(PCA_output) {
+  ev <- PCA_output$sdev^2
+  n <- length(ev)
+  bsm <- data.frame(j = seq(1:n), p = 0)
+  bsm$p[1] <- 1/n
+  for (i in 2:n) bsm$p[i] <- bsm$p[i - 1] + (1 / (n + 1 - i))
+  bsm$p <- 100 * bsm$p / n
+
+  test <- cbind(100 * ev / sum(ev), bsm$p[n:1])
+  n_PCs <- sum(test[, 1] >= test[, 2])
+
+  # Save number of principal components // Violates CRAN norms. Think of alternative.
+  # arg_name <- deparse(substitute(PCA_output))
+  # var_name <- paste("n_PCs", arg_name, sep=".")
+  # assign(var_name, n_PCs, .GlobalEnv)
+
+  # Print PCs and variance explained
+  if (!is.null(PCA_output$pc.summary$importance)) {
+    return(PCA_output$pc.summary$importance[, 1:n_PCs])
+  } else {
+    temp <- summary(PCA_output)
+    return(temp$importance[, 1:n_PCs])
+  }
+}
+
+t <- selectPCs(PCAvd00)
+
+
+
+#PCA for van dyck, 2000
+PCAintlmvd00 <- gm.prcomp(sizefree_dfvd00.x[,1:13])
+summary(PCAintlmvd00)
+
+
+screeplot(PCAintlmvd00, npcs = 20, type = "lines")
+
+getMeaningfulPCs(PCAintlmvd00$d, 168)
+
+dataPCAvd00 <- data.frame(PCAintlmvd00$x[,1], PCAintlmvd00$x[,2], sizefree_dfvd00.x$Population)
+
+plotPCAvd00 <- ggplot(dataPCAvd00, aes(x=PCAintlmvd00.x...1., y=PCAintlmvd00.x...2., colour = sizefree_dfvd00.x.Population)) +
+  labs(x = "PC 1 (88.1%)", y = "PC 2 (3.712%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+plot(plotPCAvd00)
+
+#PCA for dickman, 1998
+PCAintlmd98 <- gm.prcomp(sizefree_dfd98[,1:21])
+summary(PCAintlmd98)
+
+screeplot(PCAintlmd98, npcs = 20, type = "lines")
+
+getMeaningfulPCs(PCAintlmd98$d, 168)
+
+dataPCAd98 <- data.frame(PCAintlmd98$x[,1], PCAintlmd98$x[,2], sizefree_dfd98$Population)
+
+plotPCAd98 <- ggplot(dataPCAd98, aes(x=PCAintlmd98.x...1., y=PCAintlmd98.x...2., colour = sizefree_dfd98.Population)) +
+  labs(x = "PC 1 (85.09%)", y = "PC 2 (4.9%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+plot(plotPCAd98)
+
+#PCA for baker, 2013
+PCAintlmb13 <- gm.prcomp(sizefree_dfb13[,1:18])
+summary(PCAintlmb13)
+
+screeplot(PCAintlmb13, npcs = 20, type = "lines")
+
+getMeaningfulPCs(PCAintlmb13$d, 168)
+
+dataPCAb13 <- data.frame(PCAintlmb13$x[,1], PCAintlmb13$x[,2], sizefree_dfb13$Population)
+
+plotPCAb13 <- ggplot(dataPCAb13, aes(x=PCAintlmb13.x...1., y=PCAintlmb13.x...2., colour = sizefree_dfb13.Population)) +
+  labs(x = "PC 1 (82.37%)", y = "PC 2 (4.84%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+plot(plotPCAb13)
+
+#PCA for travouillon, 2016
+PCAintlmt16 <- gm.prcomp(sizefree_dft16[,1:22])
+summary(PCAintlmt16)
+
+screeplot(PCAintlmt16, npcs = 20, type = "lines")
+
+getMeaningfulPCs(PCAintlmt16$d, 168)
+
+
+dataPCAt16 <- data.frame(PCAintlmt16$x[,1], PCAintlmt16$x[,2], sizefree_dft16$Population)
+
+plotPCAt16 <- ggplot(dataPCAt16, aes(x=PCAintlmt16.x...1., y=PCAintlmt16.x...2., colour = sizefree_dft16.Population)) +
+  labs(x = "PC 1 (42.7%)", y = "PC 2 (13.49%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+plot(plotPCAt16)
+
+#PCA for raw and gpa GMM coordinates
+library(Morpho)
+
+gparaw<-regdist(A_reorder)
+
+
+PCAgmmraw <- gm.prcomp(gparaw$tan)
+
+dataPCAgmmraw <- data.frame(PCAgmmraw$x[,1], PCAgmmraw$x[,2], antechinusdata$Population)
+
+plotPCAgmmraw <- ggplot(dataPCAgmmraw, aes(x=PCAgmmraw.x...1., y=PCAgmmraw.x...2., colour = antechinusdata.Population)) +
+  labs(x = "PC 1 (42.7%)", y = "PC 2 (13.49%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+plot(plotPCAgmmraw)
+
+
+
+PCAgmmgpa <- gm.prcomp(gpaall$coords)
+
+screeplot(PCAgmmgpa, npcs = 20, type = "lines")
+
+getMeaningfulPCs(PCAgmmgpa$d, 168)
+
+
+dataPCAgmmgpa <- data.frame(PCAgmmgpa$x[,1], PCAgmmgpa$x[,2], antechinusdata$Population)
+
+plotPCAgmmgpa <- ggplot(dataPCAgmmgpa, aes(x=PCAgmmgpa.x...1., y=PCAgmmgpa.x...2., colour = antechinusdata.Population)) +
+  labs(x = "PC 1 (42.7%)", y = "PC 2 (13.49%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+plot(plotPCAgmmgpa)
+
+```
