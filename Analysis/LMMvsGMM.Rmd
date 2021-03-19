@@ -22,7 +22,7 @@ library(EnvStats)
 
 ```{r, load data and perform gpa for gmm data, include=FALSE}
 #Import 3D coordinates from all specimens
-coords.3D <- t (read.csv("C:/Users/pietro/Desktop/Pietro/Projects/Viacavaetal_Antechinus/Data/Antechinus_semiLMcoords.csv", header = TRUE, row.names = 1))
+coords.3D <- t (read.csv("C:/Users/pietro/Desktop/Pietro/Projects/Viacavaetal_LMMvsGMM/Data/Antechinus_semiLMcoords.csv", header = TRUE, row.names = 1))
 dim(coords.3D)
 
 #Convert 2D metadata into a 3D array
@@ -31,7 +31,7 @@ dim(A)
 Ahead <- head(dimnames(A))[3]
 
 #Load the classifier
-antechinusdata <- read.csv("C:/Users/pietro/Desktop/Pietro/Projects/Viacavaetal_Antechinus/Data/Antechinus_data.csv", header=T)
+antechinusdata <- read.csv("C:/Users/pietro/Desktop/Pietro/Projects/Viacavaetal_LMMvsGMM/Data/Antechinus_data.csv", header=T)
 dim(antechinusdata)
 Data.species <- antechinusdata$Species
 is.factor(Data.species) # check that it is a factor
@@ -87,7 +87,7 @@ vandyck2000 <- data.frame(bl = (interlmkdist(A_reorder,c(6,10))),
 
 gmeansvd00 <- apply(vandyck2000, 1, geoMean) #calculation of the geometric mean for each specimen
 
-shaperatio.vd00 <- log(vandyck2000/gmeansvd00)#freeing size with calculation of shape ratios
+shaperatio.vd00 <- log10(vandyck2000/gmeansvd00)#freeing size with calculation of shape ratios
 
 sizefree_dfvd00 <- data.frame(shaperatio.vd00, Population=antechinusdata$Population, ID=antechinusdata$ID) #integration into a dataframe with information on population ID
 
@@ -118,7 +118,7 @@ dickman1998 <- data.frame(con = (interlmkdist(A_reorder,c(6,10))),
 
 gmeansd98 <- apply(dickman1998, 1, geoMean) #calculation of the geometric mean for each specimen
 
-shaperatio.d98 <- log(dickman1998/gmeansd98) #freeing size with calculation of shape ratios
+shaperatio.d98 <- log10(dickman1998/gmeansd98) #freeing size with calculation of shape ratios
 
 sizefree_dfd98 <- data.frame(shaperatio.d98, Population=antechinusdata$Population, ID=antechinusdata$ID) #integration into a dataframe with information on population ID
 
@@ -146,7 +146,7 @@ baker2013 <- data.frame(ht_b = (sqrt(interlmkdist(A_reorder,c(3,69))^2 - ((inter
 
 gmeansb13 <- apply(baker2013, 1, geoMean) #calculation of the geometric mean for each specimen
 
-shaperatio.b13 <- log(baker2013/gmeansb13) #freeing size with calculation of shape ratios
+shaperatio.b13 <- log10(baker2013/gmeansb13) #freeing size with calculation of shape ratios
 
 sizefree_dfb13 <- data.frame(shaperatio.b13, Population=antechinusdata$Population, ID=antechinusdata$ID) #integration into a dataframe with information on population ID
 
@@ -178,7 +178,7 @@ travouillon2016 <- data.frame(onl = (interlmkdist(A_reorder,c(1,4))),
 
 gmeanst16 <- apply(travouillon2016, 1, geoMean) #calculation of the geometric mean for each specimen
 
-shaperatio.t16 <- log(travouillon2016/gmeanst16) #freeing size with calculation of shape ratios
+shaperatio.t16 <- log10(travouillon2016/gmeanst16) #freeing size with calculation of shape ratios
 
 sizefree_dft16 <- data.frame(shaperatio.t16, Population=antechinusdata$Population, ID=antechinusdata$ID) #integration into a dataframe with information on population ID
 
@@ -202,7 +202,7 @@ consensuslms <- data.frame(bl = (interlmkdist(A_reorder,c(6,10))),
 
 gmeanscon <- apply(consensuslms, 1, geoMean) #calculation of the geometric mean for each specimen
 
-shaperatio.con <- log(consensuslms/gmeanscon) #freeing size with calculation of shape ratios
+shaperatio.con <- log10(consensuslms/gmeanscon) #freeing size with calculation of shape ratios
 
 sizefree_dfcon <- data.frame(shaperatio.con, Population=antechinusdata$Population, ID=antechinusdata$ID) #integration into a dataframe with information on population ID
 
@@ -387,7 +387,7 @@ gpaall2d <- two.d.array(gpaallpop$coords)
 PCA2d <- prcomp(gpaall2d)
 summary(PCA2d) #determine the number of PCs to be used (95% of cumulative proportion)
 
-PCredante <- as.matrix(PCA2d$x[,1:120]) 
+PCredante <- as.matrix(PCA2d$x[,1:65]) 
 
 #FOR SOME REASON, WHEN I WANT TO USE 110 PC SCORES, THE LDA FINDS MISSING VALUES IN M6945 AND IF I ADD MORE PC SCORES, MORE SPECIMENS WILL APPEAR WITH MISSING VALUES.
 
@@ -562,7 +562,7 @@ plot(plotPCAgmmraw)
 
 
 
-PCAgmmgpa <- gm.prcomp(gpaall$coords)
+PCAgmmgpa <- gm.prcomp(gpaall$coords) 
 
 screeplot(PCAgmmgpa, npcs = 20, type = "lines")
 
