@@ -469,6 +469,26 @@ t <- selectPCs(PCAvd00)
 
 
 #PCA for van dyck, 2000
+PCAintlmvd00raw <- gm.prcomp(vandyck2000)
+summary(PCAintlmvd00raw)
+
+
+screeplot(PCAintlmvd00raw, npcs = 20, type = "lines")
+
+getMeaningfulPCs(PCAintlmvd00raw$d, 168)
+
+dataPCAvd00raw <- data.frame(PCAintlmvd00raw$x[,1], PCAintlmvd00raw$x[,2], sizefree_dfvd00.x$Population)
+
+plotPCAvd00raw <- ggplot(dataPCAvd00raw, aes(x=PCAintlmvd00raw.x...1., y=PCAintlmvd00raw.x...2., colour = sizefree_dfvd00.x.Population)) +
+  labs(x = "PC 1 (80.69%)", y = "PC 2 (11.02%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+plot(plotPCAvd00raw)
+
+
+
 PCAintlmvd00 <- gm.prcomp(sizefree_dfvd00.x[,1:13])
 summary(PCAintlmvd00)
 
@@ -480,14 +500,40 @@ getMeaningfulPCs(PCAintlmvd00$d, 168)
 dataPCAvd00 <- data.frame(PCAintlmvd00$x[,1], PCAintlmvd00$x[,2], sizefree_dfvd00.x$Population)
 
 plotPCAvd00 <- ggplot(dataPCAvd00, aes(x=PCAintlmvd00.x...1., y=PCAintlmvd00.x...2., colour = sizefree_dfvd00.x.Population)) +
-  labs(x = "PC 1 (88.1%)", y = "PC 2 (3.712%)") +
+  labs(x = "PC 1 (88.1%)", y = "PC 2 (3.71%)") +
   scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
   geom_point(size = 8, alpha = 0.8) +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
 plot(plotPCAvd00)
 
+
+Procvd00_dist <- dist(PCAintlmvd00$x) 
+Procvd00raw_dist <- dist(PCAintlmvd00raw$x)
+vegan::mantel(Procvd00_dist, Procvd00raw_dist, method="pearson", permutations=9999)
+
 #PCA for dickman, 1998
+
+PCAintlmd98raw <- gm.prcomp(dickman1998)
+summary(PCAintlmd98raw)
+
+
+screeplot(PCAintlmd98raw, npcs = 20, type = "lines")
+
+getMeaningfulPCs(PCAintlmd98raw$d, 168)
+
+dataPCAd98raw <- data.frame(PCAintlmd98raw$x[,1], PCAintlmd98raw$x[,2], sizefree_dfd98.x$Population)
+
+plotPCAd98raw <- ggplot(dataPCAd98raw, aes(x=PCAintlmd98raw.x...1., y=PCAintlmd98raw.x...2., colour = sizefree_dfd98.x.Population)) +
+  labs(x = "PC 1 (77.06%)", y = "PC 2 (8.63%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+plot(plotPCAd98raw)
+
+
+
 PCAintlmd98 <- gm.prcomp(sizefree_dfd98[,1:21])
 summary(PCAintlmd98)
 
@@ -498,14 +544,40 @@ getMeaningfulPCs(PCAintlmd98$d, 168)
 dataPCAd98 <- data.frame(PCAintlmd98$x[,1], PCAintlmd98$x[,2], sizefree_dfd98$Population)
 
 plotPCAd98 <- ggplot(dataPCAd98, aes(x=PCAintlmd98.x...1., y=PCAintlmd98.x...2., colour = sizefree_dfd98.Population)) +
-  labs(x = "PC 1 (85.09%)", y = "PC 2 (4.9%)") +
+labs(x = "PC 1 (85.09%)", y = "PC 2 (4.7%)") +
   scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
   geom_point(size = 8, alpha = 0.8) +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
 plot(plotPCAd98)
 
+
+
+Procd98_dist <- dist(PCAintlmd98$x) 
+Procd98raw_dist <- dist(PCAintlmd98raw$x)
+vegan::mantel(Procd98_dist, Procd98raw_dist, method="pearson", permutations=9999)
+
 #PCA for baker, 2013
+
+PCAintlmb13raw <- gm.prcomp(baker2013)
+summary(PCAintlmb13raw)
+
+screeplot(PCAintlmb13raw, npcs = 20, type = "lines")
+
+getMeaningfulPCs(PCAintlmb13raw$d, 168)
+
+dataPCAb13raw <- data.frame(PCAintlmb13raw$x[,1], PCAintlmb13raw$x[,2], sizefree_dfb13$Population)
+
+plotPCAb13raw <- ggplot(dataPCAb13raw, aes(x=PCAintlmb13raw.x...1., y=PCAintlmb13raw.x...2., colour = sizefree_dfb13.Population)) +
+  labs(x = "PC 1 (76.94%)", y = "PC 2 (9.83%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+plot(plotPCAb13raw)
+
+
+
 PCAintlmb13 <- gm.prcomp(sizefree_dfb13[,1:18])
 summary(PCAintlmb13)
 
@@ -516,14 +588,40 @@ getMeaningfulPCs(PCAintlmb13$d, 168)
 dataPCAb13 <- data.frame(PCAintlmb13$x[,1], PCAintlmb13$x[,2], sizefree_dfb13$Population)
 
 plotPCAb13 <- ggplot(dataPCAb13, aes(x=PCAintlmb13.x...1., y=PCAintlmb13.x...2., colour = sizefree_dfb13.Population)) +
-  labs(x = "PC 1 (82.37%)", y = "PC 2 (4.84%)") +
+  labs(x = "PC 1 (79.67%)", y = "PC 2 (4.73%)") +
   scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
   geom_point(size = 8, alpha = 0.8) +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
 plot(plotPCAb13)
 
+
+
+Procb13_dist <- dist(PCAintlmb13$x) 
+Procb13raw_dist <- dist(PCAintlmb13raw$x)
+vegan::mantel(Procb13_dist, Procb13raw_dist, method="pearson", permutations=9999)
+
 #PCA for travouillon, 2016
+
+PCAintlmt16raw <- gm.prcomp(travouillon2016)
+summary(PCAintlmt16raw)
+
+screeplot(PCAintlmt16raw, npcs = 20, type = "lines")
+
+getMeaningfulPCs(PCAintlmt16raw$d, 168)
+
+
+dataPCAt16raw <- data.frame(PCAintlmt16raw$x[,1], PCAintlmt16raw$x[,2], sizefree_dft16$Population)
+
+plotPCAt16raw <- ggplot(dataPCAt16raw, aes(x=PCAintlmt16raw.x...1., y=PCAintlmt16raw.x...2., colour = sizefree_dft16.Population)) +
+  labs(x = "PC 1 (72.92%)", y = "PC 2 (7.01%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+plot(plotPCAt16raw)
+
+
 PCAintlmt16 <- gm.prcomp(sizefree_dft16[,1:22])
 summary(PCAintlmt16)
 
@@ -535,25 +633,32 @@ getMeaningfulPCs(PCAintlmt16$d, 168)
 dataPCAt16 <- data.frame(PCAintlmt16$x[,1], PCAintlmt16$x[,2], sizefree_dft16$Population)
 
 plotPCAt16 <- ggplot(dataPCAt16, aes(x=PCAintlmt16.x...1., y=PCAintlmt16.x...2., colour = sizefree_dft16.Population)) +
-  labs(x = "PC 1 (42.7%)", y = "PC 2 (13.49%)") +
+  labs(x = "PC 1 (36.75%)", y = "PC 2 (11.46%)") +
   scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
   geom_point(size = 8, alpha = 0.8) +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
 plot(plotPCAt16)
 
+
+Proct16_dist <- dist(PCAintlmt16$x) 
+Proct16raw_dist <- dist(PCAintlmt16raw$x)
+vegan::mantel(Proct16_dist, Proct16raw_dist, method="pearson", permutations=9999)
+
 #PCA for raw and gpa GMM coordinates
 library(Morpho)
+library(shapes)
 
-gparaw<-regdist(A_reorder)
+gpapproc <- procGPA(A_reorder, scale = FALSE)
 
+PCAgmmraw <- gm.prcomp(gpapproc$rotated)
+summary(PCAgmmraw)
 
-PCAgmmraw <- gm.prcomp(gparaw$tan)
 
 dataPCAgmmraw <- data.frame(PCAgmmraw$x[,1], PCAgmmraw$x[,2], antechinusdata$Population)
 
 plotPCAgmmraw <- ggplot(dataPCAgmmraw, aes(x=PCAgmmraw.x...1., y=PCAgmmraw.x...2., colour = antechinusdata.Population)) +
-  labs(x = "PC 1 (42.7%)", y = "PC 2 (13.49%)") +
+  labs(x = "PC 1 (79.02%)", y = "PC 2 (2.7%)") +
   scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
   geom_point(size = 8, alpha = 0.8) +
   theme_bw() +
@@ -563,20 +668,140 @@ plot(plotPCAgmmraw)
 
 
 PCAgmmgpa <- gm.prcomp(gpaall$coords) 
+summary(PCAgmmgpa)
+
 
 screeplot(PCAgmmgpa, npcs = 20, type = "lines")
 
 getMeaningfulPCs(PCAgmmgpa$d, 168)
 
 
-dataPCAgmmgpa <- data.frame(PCAgmmgpa$x[,1], PCAgmmgpa$x[,2], antechinusdata$Population)
+dataPCAgmmgpa <- data.frame(-PCAgmmgpa$x[,1], PCAgmmgpa$x[,2], antechinusdata$Population)
 
-plotPCAgmmgpa <- ggplot(dataPCAgmmgpa, aes(x=PCAgmmgpa.x...1., y=PCAgmmgpa.x...2., colour = antechinusdata.Population)) +
-  labs(x = "PC 1 (42.7%)", y = "PC 2 (13.49%)") +
+plotPCAgmmgpa <- ggplot(dataPCAgmmgpa, aes(x=X.PCAgmmgpa.x...1., y=PCAgmmgpa.x...2., colour = antechinusdata.Population)) +
+  labs(x = "PC 1 (18.52%)", y = "PC 2 (9.95%)") +
   scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
   geom_point(size = 8, alpha = 0.8) +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
 plot(plotPCAgmmgpa)
 
+
+
+ProcFull_dist <- dist(PCAgmmgpa$x) 
+ProcPartial_dist <- dist(PCAgmmraw$x)
+vegan::mantel(ProcFull_dist, ProcPartial_dist, method="pearson", permutations=9999)
+
 ```
+
+```{r, allometry, include=FALSE}
+
+#GMM data
+fit.sizegmm <- procD.lm(f1 = gpaallpop$coords~gpaallpop$Csize, print.progress = FALSE)
+fit.sizegmm.plot <- plotAllometry(fit.sizegmm, size = gpaallpop$Csize, logsz = FALSE, method = "RegScore", pch = 19, cex = 3)
+anova(fit.sizegmm)
+
+dataallometrygmmplot <- data.frame(fit.sizegmm.plot$size.var, fit.sizegmm.plot$RegScore)
+
+plotallomgmm <- ggplot(dataallometrygmmplot, aes(x=fit.sizegmm.plot.size.var, y=fit.sizegmm.plot.RegScore)) +
+  labs(x = "Centroid Size", y = "Shape Score") +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+
+plot(plotallomgmm)
+
+PCAgmmresiduals <- gm.prcomp(fit.sizegmm$residuals)
+summary(PCAgmmresiduals)
+
+PCgmmresiduals <- as.matrix(PCAgmmresiduals$x[,1:68]) 
+
+Ldagmmresiduals <- lda(PCgmmresiduals, antechinusdatapop$Population, prior = c(1,1,1)/3, CV = TRUE)
+Ldagmmresiduals
+
+popfactor.gmmante <- as.factor(antechinusdatapop$Population)
+
+ucpm.gmmresiduals.lda <- ucpm(Ldagmmresiduals$posterior, popfactor.gmmante)
+ucpm.gmmresiduals.lda
+
+
+#LMM data
+
+#BUT THIS IS WITHOUT ISOMETRIC CORRECTION!!! the isometric correction is already using the geo mean so it doesn't make sense to remove allometry with the same geo mean...
+
+consensus.pop <- consensuslms[-c(which(sizefree_dfcon$Population=="?")),]
+gmeanscon.pop <- gmeanscon[-c(which(sizefree_dfcon$Population=="?"))]
+
+
+fit.sizelmm <- procD.lm(f1 = sizefree_dfcon[,1:12]~gpaall$Csize, print.progress = FALSE)
+fit.sizelmm.plot <- plotAllometry(fit.sizelmm, size = gpaall$Csize, logsz = TRUE, method = "RegScore", pch = 19, cex = 3)
+anova(fit.sizelmm)
+
+dataallometrylmmplot <- data.frame(fit.sizelmm.plot$size.var, fit.sizelmm.plot$RegScore)
+
+plotallomlmm <- ggplot(dataallometrylmmplot, aes(x=fit.sizelmm.plot.size.var, y=fit.sizelmm.plot.RegScore)) +
+  labs(x = "Geometric Mean", y = "Shape Score") +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 25), legend.title = element_text(size = 25), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.justification = "center")
+
+plot(plotallomlmm)
+
+ldalmmcon <- lda(consensus.pop, antechinusdatapop$Population, prior = c(1,1,1)/3, CV = TRUE)
+ldalmmcon
+
+ucpm.lmmcon.lda <- ucpm(ldalmmcon$posterior, popfactor.gmmante)
+ucpm.lmmcon.lda
+
+
+ldalmmconresiduals <- lda(fit.sizelmm$residuals, antechinusdatapop$Population, prior = c(1,1,1)/3, CV = TRUE)
+ldalmmconresiduals
+
+ucpm.lmmresiduals.lda <- ucpm(ldalmmconresiduals$posterior, popfactor.gmmante)
+ucpm.lmmresiduals.lda
+
+##
+##
+##
+
+
+#fit.sizelmm <- procD.lm(f1 = sizefree_dfcon[,1:12]~gmeanscon, print.progress = FALSE)
+#fit.sizelmm.plot <- plotAllometry(fit.sizelmm, size = gmeanscon, logsz = FALSE, method = "RegScore", pch = 19, cex = 3)
+#anova(fit.sizelmm)
+
+
+plot(scale(gmeanscon)~scale(gpaall$Csize))
+abline(a=0, b=1)
+scale()
+
+
+plot(scale(sizefree_dfcon[,10])~scale(gmeanscon))
+
+
+summaries <- list()
+
+for (i in 1:12) {
+
+summaries [[i]] <- summary(lm(sizefree_dfcon[,i]~gmeanscon))
+
+}
+
+
+summaries_raw <- list()
+
+for (i in 1:12) {
+
+summaries_raw [[i]] <- summary(lm(consensuslms[,i]~gmeanscon))
+
+}
+
+
+
+plot(consensuslms[[1]]~gmeanscon)
+
+plot(log(consensuslms[[1]]/gmeanscon)~log(gmeanscon))
+
+
+  
+```
+
