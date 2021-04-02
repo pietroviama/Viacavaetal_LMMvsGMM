@@ -769,8 +769,37 @@ vegan::mantel(ProcFull_dist, ProcPartial_dist, method="pearson", permutations=99
 ```
 
 ```{r, allometry, include=FALSE}
+#GMM data residuals for PCA
+fit.sizegmm <- procD.lm(f1 = gpaall$coords~log(gpaall$Csize),  print.progress = FALSE)
+fit.sizegmm.plot <- plotAllometry(fit.sizegmm, size = gpaall$Csize, logsz = FALSE, method = "RegScore", pch = 19, cex = 3)
+anova(fit.sizegmm)
 
-#GMM data
+dataallometrygmmplot <- data.frame(fit.sizegmm.plot$size.var, fit.sizegmm.plot$RegScore)
+
+plotallomgmm <- ggplot(dataallometrygmmplot, aes(x=fit.sizegmm.plot.size.var, y=fit.sizegmm.plot.RegScore)) +
+  labs(x = "Centroid Size", y = "Shape Score") +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.title = element_blank(), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.position = "none")
+
+plot(plotallomgmm)
+
+PCAgmmresiduals <- gm.prcomp(fit.sizegmm$residuals)
+summary(PCAgmmresiduals)
+
+dataPCAgmmresiduals <- data.frame(-PCAgmmresiduals$x[,1], PCAgmmresiduals$x[,2], antechinusdata$Population)
+
+plotPCAgmmresiduals <- ggplot(dataPCAgmmresiduals, aes(x=X.PCAgmmresiduals.x...1., y=PCAgmmresiduals.x...2., colour = antechinusdata.Population)) +
+  labs(x = "PC 1 (12.88%)", y = "PC 2 (11.27%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.title = element_blank(), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.position = "none")
+plot(plotPCAgmmresiduals)
+
+
+#GMM data residuals popfor LDA
+
 fit.sizegmm <- procD.lm(f1 = gpaallpop$coords~log(gpaallpop$Csize),  print.progress = FALSE)
 fit.sizegmm.plot <- plotAllometry(fit.sizegmm, size = gpaallpop$Csize, logsz = FALSE, method = "RegScore", pch = 19, cex = 3)
 anova(fit.sizegmm)
@@ -881,8 +910,24 @@ summaries_raw [[i]] <- summary(lm(consensuslms[,i]~gmeanscon))
 
 }
 
+#vd00 with "?" for pca
+fit.xvd00 <- procD.lm(sizefree_dfvd00.x[,1:13]~log(gmeansvd00))
+anova(fit.xvd00)
+PCAvd00res <- prcomp(fit.xvd00$residuals)
+summary(PCAvd00res)
+
+dataPCAvd00res <- data.frame(PCAvd00res$x[,1], PCAvd00res$x[,2], antechinusdata$Population)
+
+plotPCAvd00res <- ggplot(dataPCAvd00res, aes(x=PCAvd00res.x...1., y=PCAvd00res.x...2., colour = antechinusdata.Population)) +
+  labs(x = "PC 1 (87.97%)", y = "PC 2 (3.86%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.title = element_blank(), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.position = "none")
+plot(plotPCAvd00res)
 
 
+#vd00 pop for lda
 gmeansvd00.pop <- gmeansvd00[-c(which(sizefree_dfvd00.x$Population=="?"))]
 fit.xvd00 <- procD.lm(sizefree_dfvd00.x.pop[,1:13]~log(gmeansvd00.pop))
 anova(fit.xvd00)
@@ -908,7 +953,24 @@ plotPCAvd00res <- ggplot(dataPCAvd00res, aes(x=PCAvd00res.x...1., y=PCAvd00res.x
 plot(plotPCAvd00res)
 
 
+#d98 with "?" for pca
+fit.xd98 <- procD.lm(sizefree_dfd98.x[,1:13]~log(gmeansd98))
+anova(fit.xd98)
+PCAd98res <- prcomp(fit.xd98$residuals)
+summary(PCAd98res)
 
+dataPCAd98res <- data.frame(PCAd98res$x[,1], PCAd98res$x[,2], antechinusdata$Population)
+
+plotPCAd98res <- ggplot(dataPCAd98res, aes(x=PCAd98res.x...1., y=PCAd98res.x...2., colour = antechinusdata.Population)) +
+  labs(x = "PC 1 (84.18%)", y = "PC 2 (5.13%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.title = element_blank(), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.position = "none")
+plot(plotPCAd98res)
+
+
+#d98 pop for lda
 gmeansd98.pop <- gmeansd98[-c(which(sizefree_dfd98.x$Population=="?"))]
 fit.xd98 <- procD.lm(sizefree_dfd98.x.pop[,1:21]~log(gmeansd98.pop))
 anova(fit.xd98)
@@ -934,7 +996,24 @@ plotPCAd98res <- ggplot(dataPCAd98res, aes(x=PCAd98res.x...1., y=PCAd98res.x...2
 plot(plotPCAd98res)
 
 
+#b13 with "?" for pca
+fit.xb13 <- procD.lm(sizefree_dfb13.x[,1:13]~log(gmeansb13))
+anova(fit.xb13)
+PCAb13res <- prcomp(fit.xb13$residuals)
+summary(PCAb13res)
 
+dataPCAb13res <- data.frame(PCAb13res$x[,1], PCAb13res$x[,2], antechinusdata$Population)
+
+plotPCAb13res <- ggplot(dataPCAb13res, aes(x=PCAb13res.x...1., y=PCAb13res.x...2., colour = antechinusdata.Population)) +
+  labs(x = "PC 1 (81.45%)", y = "PC 2 (5.14%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.title = element_blank(), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.position = "none")
+plot(plotPCAb13res)
+
+
+#b13 pop for lda
 gmeansb13.pop <- gmeansb13[-c(which(sizefree_dfb13.x$Population=="?"))]
 fit.xb13 <- procD.lm(sizefree_dfb13.x.pop[,1:18]~log(gmeansb13.pop))
 anova(fit.xb13)
@@ -960,7 +1039,24 @@ plotPCAb13res <- ggplot(dataPCAb13res, aes(x=PCAb13res.x...1., y=PCAb13res.x...2
 plot(plotPCAb13res)
 
 
+#t16 with "?" for pca
+fit.xt16 <- procD.lm(sizefree_dft16.x[,1:13]~log(gmeanst16))
+anova(fit.xt16)
+PCAt16res <- prcomp(fit.xt16$residuals)
+summary(PCAt16res)
 
+dataPCAt16res <- data.frame(PCAt16res$x[,1], PCAt16res$x[,2], antechinusdata$Population)
+
+plotPCAt16res <- ggplot(dataPCAt16res, aes(x=PCAt16res.x...1., y=PCAt16res.x...2., colour = antechinusdata.Population)) +
+  labs(x = "PC 1 (31.76%)", y = "PC 2 (16.86%)") +
+  scale_color_manual(values = c("grey","red", "blue", "darkgreen")) +
+  geom_point(size = 8, alpha = 0.8) +
+  theme_bw() +
+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.title = element_blank(), axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text = element_text(size = 20), legend.position = "none")
+plot(plotPCAt16res)
+
+
+#t16 pop for lda
 
 gmeanst16.pop <- gmeanst16[-c(which(sizefree_dft16.x$Population=="?"))]
 fit.xt16 <- procD.lm(sizefree_dft16.x.pop[,1:22]~log(gmeanst16.pop))
