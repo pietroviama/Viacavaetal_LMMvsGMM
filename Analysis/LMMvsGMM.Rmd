@@ -931,6 +931,10 @@ plot(plotPCAvd00res)
 gmeansvd00.pop <- gmeansvd00[-c(which(sizefree_dfvd00.x$Population=="?"))]
 fit.xvd00 <- procD.lm(sizefree_dfvd00.x.pop[,1:13]~log(gmeansvd00.pop))
 anova(fit.xvd00)
+
+fitvd00.pop.uni <- procD.lm(sizefree_dfvd00.x.pop[,1:13]~log(gmeansvd00.pop)*antechinusdatapop$Population, effect.type = "F")
+summary(fitvd00.pop.uni)
+
 plotAllometry(fit.xvd00, size = gmeansvd00.pop, logsz = FALSE, method = "RegScore", pch = 19, cex = 3)
 ldavd00residuals <- lda(fit.xvd00$residuals, antechinusdatapop$Population, prior = c(1,1,1)/3, CV = TRUE)
 ldavd00residuals
@@ -974,6 +978,11 @@ plot(plotPCAd98res)
 gmeansd98.pop <- gmeansd98[-c(which(sizefree_dfd98.x$Population=="?"))]
 fit.xd98 <- procD.lm(sizefree_dfd98.x.pop[,1:21]~log(gmeansd98.pop))
 anova(fit.xd98)
+
+fitd98.pop.uni <- procD.lm(sizefree_dfd98.x.pop[,1:13]~log(gmeansd98.pop)*antechinusdatapop$Population, effect.type = "F")
+summary(fitd98.pop.uni)
+
+
 plotAllometry(fit.xd98, size = gmeansd98.pop, logsz = FALSE, method = "RegScore", pch = 19, cex = 3)
 ldad98residuals <- lda(fit.xd98$residuals, antechinusdatapop$Population, prior = c(1,1,1)/3, CV = TRUE)
 ldad98residuals
@@ -1017,6 +1026,11 @@ plot(plotPCAb13res)
 gmeansb13.pop <- gmeansb13[-c(which(sizefree_dfb13.x$Population=="?"))]
 fit.xb13 <- procD.lm(sizefree_dfb13.x.pop[,1:18]~log(gmeansb13.pop))
 anova(fit.xb13)
+
+fitb13.pop.uni <- procD.lm(sizefree_dfb13.x.pop[,1:13]~log(gmeansb13.pop)*antechinusdatapop$Population, effect.type = "F")
+summary(fitb13.pop.uni)
+
+
 plotAllometry(fit.xb13, size = gmeansb13.pop, logsz = FALSE, method = "RegScore", pch = 19, cex = 3)
 ldab13residuals <- lda(fit.xb13$residuals, antechinusdatapop$Population, prior = c(1,1,1)/3, CV = TRUE)
 ldab13residuals
@@ -1061,6 +1075,11 @@ plot(plotPCAt16res)
 gmeanst16.pop <- gmeanst16[-c(which(sizefree_dft16.x$Population=="?"))]
 fit.xt16 <- procD.lm(sizefree_dft16.x.pop[,1:22]~log(gmeanst16.pop))
 anova(fit.xt16)
+
+fitt16.pop.uni <- procD.lm(sizefree_dft16.x.pop[,1:13]~log(gmeanst16.pop)*antechinusdatapop$Population, effect.type = "F")
+summary(fitt16.pop.uni)
+
+
 plotAllometry(fit.xt16, size = gmeanst16.pop, logsz = FALSE, method = "RegScore", pch = 19, cex = 3)
 ldat16residuals <- lda(fit.xt16$residuals, antechinusdatapop$Population, prior = c(1,1,1)/3, CV = TRUE)
 ldat16residuals
