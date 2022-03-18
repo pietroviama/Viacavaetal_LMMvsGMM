@@ -289,11 +289,11 @@ modelsizefree_dfvd00
 PCAvd00 <- prcomp(sizefree_dfvd00.x.pop[,1:13])
 summary(PCAvd00) #determine the number of PCs to be used (95% of cumulative proportion)
 
-PCvd00 <- as.matrix(PCAvd00$x) 
+PCvd00red <- data.frame(PCAvd00$x[,1:4]) 
 
-PCvd00$Population <- sizefree_dfvd00.x.pop[,14]
+PCvd00red$Population <- sizefree_dfvd00.x.pop[,14]
 
-modelsizefree_dfvd00 <- lda(Population~., data = sizefree_dfvd00.x.pop, prior = c(1,1,1)/3, CV = TRUE)
+modelsizefree_dfvd00 <- lda(Population~., data = PCvd00red, prior = c(1,1,1)/3, CV=TRUE) #warning: variables are collinear when using the entire LMM dataset, which is why we choose to regularize the data with a PCA step previous to the LDA. the LMM are indeed collinear and this is a question this research addresses.
 modelsizefree_dfvd00
 
 ##########
@@ -301,14 +301,14 @@ modelsizefree_dfvd00
 
 
 
-modelsizefree_dfvd00.plot <- lda(Population~., data = sizefree_dfvd00.x.pop, prior = c(1,1,1)/3)
+modelsizefree_dfvd00.plot <- lda(Population~., data = PCvd00red, prior = c(1,1,1)/3)
 ldsvd00 <- predict(modelsizefree_dfvd00.plot)
-dataEllipse(ldsvd00[,1], ldsvd00[,2], groups=as.factor(sizefree_dfvd00.x.pop$Population), levels=0.95, ylim=c(-4,6), xlim=c(-7,7))
+dataEllipse(ldsvd00$x[,1], ldsvd00$x[,2], groups=as.factor(PCvd00red$Population), levels=0.95, ylim=c(-4,6), xlim=c(-7,7))
 
-dataldavd00 <- data.frame(ldsvd00[,1], ldsvd00[,2], sizefree_dfvd00.x.pop$Population)
+dataldavd00 <- data.frame(ldsvd00$x[,1], ldsvd00$x[,2], PCvd00red$Population)
 
-plotldavd00 <- ggplot(dataldavd00, aes(x=ldsvd00...1., y=ldsvd00...2., colour = sizefree_dfvd00.x.pop.Population)) +
-  labs(x = "LD 1 (79.59%)", y = "LD 2 (20.41%)") +
+plotldavd00 <- ggplot(dataldavd00, aes(x=ldsvd00.x...1., y=-ldsvd00.x...2., colour = PCvd00red.Population)) +
+  labs(x = "LD 1 (92.27%)", y = "LD 2 (7.73%)") +
   scale_color_manual(values = c("#332288", "#CC6677", "#999933")) +
   geom_point(size = 4, alpha = 0.8) +
   theme_bw() +
@@ -320,27 +320,110 @@ plot(plotldavd00)
 
 
 dfintlmlda.popx.sizefree_dfvd00 <- sizefree_dfvd00.x[-c(which(sizefree_dfvd00.x$Population=="subtropicus"), which(sizefree_dfvd00.x$Population=="south"), which(sizefree_dfvd00.x$Population=="north")),]
-predsizefree_dfvd00.lda <- predict(modelsizefree_dfvd00, dfintlmlda.popx.sizefree_dfvd00)$class
+
+predsizefree_dfvd00.lda <- predict(modelsizefree_dfvd00, dfintlmlda.popx.sizefree_dfvd00)
+
+
+
+
 
 rda.sizefree_dfvd00 <- rda(Population ~ ., data=sizefree_dfvd00.x.pop, crossval=TRUE, prior = 1)
+
 predsizefree_dfvd00.rda <- predict(rda.sizefree_dfvd00, sizefree_dfvd00.x.pop)
+
 predsizefree_dfvd00.rda.x <- predict(rda.sizefree_dfvd00, dfintlmlda.popx.sizefree_dfvd00)
 
-attr.sizefree_dfvd00 <- list(dim = c(136,3), dimnames = list(as.character(1:136), c("north", "south", "subtropicus") ))
-attributes(predsizefree_dfvd00.rda$posterior) <- attr.sizefree_dfvd00
+#attr.sizefree_dfvd00 <- list(dim = c(136,3), dimnames = list(as.character(1:136), c("north", "south", "subtropicus") ))
 
-attr2.sizefree_dfvd00 <- list(levels = c("north", "south", "subtropicus"), class ="factor")
+#attributes(predsizefree_dfvd00.rda$posterior) <- attr.sizefree_dfvd00
+
+#attr2.sizefree_dfvd00 <- list(levels = c("north", "south", "subtropicus"), class ="factor")
+
 #attributes(sizefree_dfvd00.x.pop$Population) <- attr2.sizefree_dfvd00
+
 factor.sizefree_dfvd00 <- as.factor(sizefree_dfvd00.x.pop$Population)
 
-#ucpm.sizefree_dfvd00.rda <- ucpm(predsizefree_dfvfd00.rda$posterior, factor.sizefree_dfvd00)
-#ucpm.sizefree_dfvd00.rda
+ucpm.sizefree_dfvd00.rda <- ucpm(predsizefree_dfvd00.rda$posterior, factor.sizefree_dfvd00)
+ucpm.sizefree_dfvd00.rda
 
 ucpm.sizefree_dfvd00.lda <- ucpm(modelsizefree_dfvd00$posterior, factor.sizefree_dfvd00)
 ucpm.sizefree_dfvd00.lda
 
 #For Dickman, 1998
 
+
+#########
+sizefree_dfd98.x <- subset(sizefree_dfd98, select = - ID)
+sizefree_dfd98.x.pop <- sizefree_dfd98.x[-c(which(sizefree_dfd98.x$Population=="?")),]
+modelsizefree_dfd98 <- lda(Population~., data = sizefree_dfd98.x.pop, prior = c(1,1,1)/3, CV = TRUE)
+modelsizefree_dfd98
+
+PCAd98 <- prcomp(sizefree_dfd98.x.pop[,1:21])
+summary(PCAd98) #determine the number of PCs to be used (95% of cumulative proportion)
+
+PCd98red <- data.frame(PCAd98$x[,1:8]) 
+
+PCd98red$Population <- sizefree_dfd98.x.pop[,22]
+
+modelsizefree_dfd98 <- lda(Population~., data = PCd98red, prior = c(1,1,1)/3, CV=TRUE) #warning: variables are collinear when using the entire LMM dataset, which is why we choose to regularize the data with a PCA step previous to the LDA. the LMM are indeed collinear and this is a question this research addresses.
+modelsizefree_dfd98
+
+##########
+  
+
+
+
+modelsizefree_dfd98.plot <- lda(Population~., data = PCd98red, prior = c(1,1,1)/3)
+ldsd98 <- predict(modelsizefree_dfd98.plot)
+dataEllipse(ldsd98$x[,1], ldsd98$x[,2], groups=as.factor(PCd98red$Population), levels=0.95, ylim=c(-4,6), xlim=c(-7,7))
+
+dataldad98 <- data.frame(ldsd98$x[,1], ldsd98$x[,2], PCd98red$Population)
+
+plotldad98 <- ggplot(dataldad98, aes(x=ldsd98.x...1., y=ldsd98.x...2., colour = PCd98red.Population)) +
+  labs(x = "LD 1 (75.67%)", y = "LD 2 (4.55%)") +
+  scale_color_manual(values = c("#332288", "#CC6677", "#999933")) +
+  geom_point(size = 4, alpha = 0.8) +
+  theme_bw() +
+  stat_ellipse(size = 2, level = 0.95) +
+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.title = element_blank(), axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15), axis.text = element_blank(), legend.position = "none")
+plot(plotldad98)
+
+
+
+
+dfintlmlda.popx.sizefree_dfd98 <- sizefree_dfd98.x[-c(which(sizefree_dfd98.x$Population=="subtropicus"), which(sizefree_dfd98.x$Population=="south"), which(sizefree_dfd98.x$Population=="north")),]
+
+predsizefree_dfd98.lda <- predict(modelsizefree_dfd98, dfintlmlda.popx.sizefree_dfd98)
+
+
+
+
+
+rda.sizefree_dfd98 <- rda(Population ~ ., data=sizefree_dfd98.x.pop, crossval=TRUE, prior = 1)
+
+predsizefree_dfd98.rda <- predict(rda.sizefree_dfd98, sizefree_dfd98.x.pop)
+
+predsizefree_dfd98.rda.x <- predict(rda.sizefree_dfd98, dfintlmlda.popx.sizefree_dfd98)
+
+#attr.sizefree_dfd98 <- list(dim = c(136,3), dimnames = list(as.character(1:136), c("north", "south", "subtropicus") ))
+
+#attributes(predsizefree_dfd98.rda$posterior) <- attr.sizefree_dfd98
+
+#attr2.sizefree_dfd98 <- list(levels = c("north", "south", "subtropicus"), class ="factor")
+
+#attributes(sizefree_dfd98.x.pop$Population) <- attr2.sizefree_dfd98
+
+factor.sizefree_dfd98 <- as.factor(sizefree_dfd98.x.pop$Population)
+
+ucpm.sizefree_dfd98.rda <- ucpm(predsizefree_dfd98.rda$posterior, factor.sizefree_dfd98)
+ucpm.sizefree_dfd98.rda
+
+ucpm.sizefree_dfd98.lda <- ucpm(modelsizefree_dfd98$posterior, factor.sizefree_dfd98)
+ucpm.sizefree_dfd98.lda
+
+#####################
+#####################
+#####################CHECK NEXT LINES BELOW AND COMPARE TO NEW LINES ABOVE. DO NOT FORGET TO CHECK IF LD AND PC %s ARE GOOD.
 
 sizefree_dfd98.x <- subset(sizefree_dfd98, select = - ID)
 sizefree_dfd98.x.pop <- sizefree_dfd98.x[-c(which(sizefree_dfd98.x$Population=="?")),]
