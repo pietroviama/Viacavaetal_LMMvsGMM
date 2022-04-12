@@ -1091,5 +1091,19 @@ ucpmgmmac
 ```
 
 
+```{r, predictions of unknown specimens, include = FALSE}
+
+A_reorder_unknown <- A_reorder[,,c(which(antechinusdata$Population=="?"))]
+
+predspecgmm <- predict(PCAgmmgpa, newdata = A_reorder_unknown)
 
 
+vd00_unknown <- vandyck2000[c(which(antechinusdata$Population=="?")),]
+
+predspecvd00 <- predict(PCAvd00raw, newdata = vd00_unknown)
+
+predspecvd00.df <- as.data.frame(predspecvd00)
+
+ldapredvd00 <- predict(ldavd00raw, newdata = predspecvd00.df)
+
+```
