@@ -384,7 +384,7 @@ fitdata.vd00 <- as.matrix(cbind(rdf.vd00$bl, rdf.vd00$pl, rdf.vd00$p1_3, rdf.vd0
 
 rdf.vd00$LMM <- fitdata.vd00
 
-fit.vd00 <- lm.rrpp(LMM~gmeansvd00.pop, data = rdf.vd00)
+fit.vd00 <- lm.rrpp(LMM~log(gmeansvd00.pop), data = rdf.vd00)
 
 anova(fit.vd00)
 
@@ -417,7 +417,7 @@ fitdata.d98 <- as.matrix(cbind(rdf.d98$con, rdf.d98$pal, rdf.d98$p1_3, rdf.d98$s
 
 rdf.d98$LMM <- fitdata.d98
 
-fit.d98 <- lm.rrpp(LMM~gmeansd98.pop, data = rdf.d98)
+fit.d98 <- lm.rrpp(LMM~log(gmeansd98.pop), data = rdf.d98)
 
 anova(fit.d98)
 
@@ -451,7 +451,7 @@ fitdata.b13 <- as.matrix(cbind(rdf.b13$ht_b, rdf.b13$uml, rdf.b13$upl, rdf.b13$p
 
 rdf.b13$LMM <- fitdata.b13
 
-fit.b13 <- lm.rrpp(LMM~gmeansb13.pop, data = rdf.b13)
+fit.b13 <- lm.rrpp(LMM~log(gmeansb13.pop), data = rdf.b13)
 
 anova(fit.b13)
 
@@ -484,7 +484,7 @@ fitdata.t16 <- as.matrix(cbind(rdf.t16$onl, rdf.t16$nl, rdf.t16$anw, rdf.t16$nps
 
 rdf.t16$LMM <- fitdata.t16
 
-fit.t16 <- lm.rrpp(LMM~gmeanst16.pop, data = rdf.t16)
+fit.t16 <- lm.rrpp(LMM~log(gmeanst16.pop), data = rdf.t16)
 
 anova(fit.t16)
 
