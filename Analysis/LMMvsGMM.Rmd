@@ -1097,6 +1097,7 @@ A_reorder_unknown <- A_reorder[,,c(which(antechinusdata$Population=="?"))]
 
 predspecgmm <- predict(PCAgmmgpa, newdata = A_reorder_unknown)
 
+#vd00 raw
 
 vd00_unknown <- vandyck2000[c(which(antechinusdata$Population=="?")),]
 
@@ -1105,5 +1106,48 @@ predspecvd00 <- predict(PCAvd00raw, newdata = vd00_unknown)
 predspecvd00.df <- as.data.frame(predspecvd00)
 
 ldapredvd00 <- predict(ldavd00raw, newdata = predspecvd00.df)
+
+ldapredvd00$class
+
+#d98 raw
+
+d98_unknown <- dickman1998[c(which(antechinusdata$Population=="?")),]
+
+predspecd98 <- predict(PCAd98raw, newdata = d98_unknown)
+
+predspecd98.df <- as.data.frame(predspecd98)
+
+ldapredd98 <- predict(ldad98raw, newdata = predspecd98.df)
+
+ldapredd98$class
+
+#b13 raw
+
+b13_unknown <- baker2013[c(which(antechinusdata$Population=="?")),]
+
+predspecb13 <- predict(PCAb13raw, newdata = b13_unknown)
+
+predspecb13.df <- as.data.frame(predspecb13)
+
+ldapredb13 <- predict(ldab13raw, newdata = predspecb13.df)
+
+ldapredb13$class
+
+#t16 raw
+
+t16_unknown <- travouillon2016[c(which(antechinusdata$Population=="?")),]
+
+predspect16 <- predict(PCAt16raw, newdata = t16_unknown)
+
+predspect16.df <- as.data.frame(predspect16)
+
+ldapredt16 <- predict(ldat16raw, newdata = predspect16.df)
+
+ldapredt16$class
+
+
+testtable <- matrix(c(ldapredvd00$class, ldapredd98$class, ldapredb13$class, ldapredt16$class), ncol = 4, byrow = TRUE)
+
+predtable <- as.table(testtable)
 
 ```
