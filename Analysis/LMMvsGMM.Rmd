@@ -1091,11 +1091,9 @@ ucpmgmmac
 ```
 
 
-```{r, predictions of unknown specimens, include = FALSE}
+```{r, predictions of unknown specimens with raw data, include = FALSE}
 
-A_reorder_unknown <- A_reorder[,,c(which(antechinusdata$Population=="?"))]
-
-predspecgmm <- predict(PCAgmmgpa, newdata = A_reorder_unknown)
+#RAW
 
 #vd00 raw
 
@@ -1145,9 +1143,204 @@ ldapredt16 <- predict(ldat16raw, newdata = predspect16.df)
 
 ldapredt16$class
 
+#getting maximum posterior probabilities for each specimen
 
-testtable <- matrix(c(ldapredvd00$class, ldapredd98$class, ldapredb13$class, ldapredt16$class), ncol = 4, byrow = TRUE)
+vd00postdf <- as.data.frame(ldapredvd00$posterior)
 
-predtable <- as.table(testtable)
+vd00postdf$max <- apply(X = vd00postdf, MARGIN = 1, FUN = max)*100
+
+vd00postdf$maxround <- as.factor(round(vd00postdf$max, digits = 2))
+
+d98postdf <- as.data.frame(ldapredd98$posterior)
+
+d98postdf$max <- apply(X = d98postdf, MARGIN = 1, FUN = max)*100
+
+d98postdf$maxround <- as.factor(round(d98postdf$max, digits = 2))
+
+b13postdf <- as.data.frame(ldapredb13$posterior)
+
+b13postdf$max <- apply(X = b13postdf, MARGIN = 1, FUN = max)*100
+
+b13postdf$maxround <- as.factor(round(b13postdf$max, digits = 2))
+
+t16postdf <- as.data.frame(ldapredt16$posterior)
+
+t16postdf$max <- apply(X = t16postdf, MARGIN = 1, FUN = max)*100
+
+t16postdf$maxround <- as.factor(round(t16postdf$max, digits = 2))
+
+#GMM RAW
+
+#PCA of raw GMM data (unscaled or partial Procrustes superimposition) for all specimens
+
+gpapprocall <- ProcGPA(A_reorder, scale = FALSE)
+
+PCAgmmrawall <- gm.prcomp(gpapprocall$rotated)
+
+summary(PCAgmmrawall)
+
+#extraction of unknown specimens for lda model
+
+PCgmmrawpop <- data.frame(PCAgmmrawall$x[-c(which(antechinusdata$Population=="?")),1:23])
+
+PCgmmrawpop$Population <- antechinusdatapop$Population
+
+ldagmmrawpop <- lda(Population~., data = PCgmmrawpop, prior = c(1,1,1)/3)
+
+ldsgmmrawpop <- predict(ldagmmrawpop)
+
+#prediction of unknown specimens
+
+PCgmmrawunknown <- data.frame(PCAgmmrawall$x[c(which(antechinusdata$Population=="?")),1:23])
+
+ldapredgmmraw <- predict(ldagmmrawpop, newdata = PCgmmrawunknown)
+
+gmmrawpostdf <- as.data.frame(ldapredgmmraw$posterior)
+
+gmmrawpostdf$max <- apply(X = gmmrawpostdf, MARGIN = 1, FUN = max)*100
+
+gmmrawpostdf$maxround <- as.factor(round(gmmrawpostdf$max, digits = 2))
+
+
+#building the table
+
+matrix_rawpred <- matrix(c(ldapredvd00$class, vd00postdf$maxround, ldapredd98$class,d98postdf$maxround, ldapredb13$class, b13postdf$maxround, ldapredt16$class, t16postdf$maxround, ldapredgmmraw$class, gmmrawpostdf$maxround), ncol = 10, byrow = FALSE)
+
+colnames(matrix_rawpred) <- c("vd00", "vd00 (%)", "d98", "d98 (%)", "b13", "b13 (%)", "t16", "t16 (%)", "gmm", "gmm (%)")
+
+rownames(matrix_rawpred) <- rownames(vd00_unknown)
+
+table_rawpred <- as.table(matrix_rawpred)
+
+plot(table_rawpred)
+
+
+
+```
+
+```{r, predictions of unknown specimens with size-free data, include = FALSE}
+
+#SIZE-FREE
+
+#vd00 raw
+
+vd00_unknown <- vandyck2000[c(which(antechinusdata$Population=="?")),]
+
+predspecvd00 <- predict(PCAvd00raw, newdata = vd00_unknown)
+
+predspecvd00.df <- as.data.frame(predspecvd00)
+
+ldapredvd00 <- predict(ldavd00raw, newdata = predspecvd00.df)
+
+ldapredvd00$class
+
+#d98 raw
+
+d98_unknown <- dickman1998[c(which(antechinusdata$Population=="?")),]
+
+predspecd98 <- predict(PCAd98raw, newdata = d98_unknown)
+
+predspecd98.df <- as.data.frame(predspecd98)
+
+ldapredd98 <- predict(ldad98raw, newdata = predspecd98.df)
+
+ldapredd98$class
+
+#b13 raw
+
+b13_unknown <- baker2013[c(which(antechinusdata$Population=="?")),]
+
+predspecb13 <- predict(PCAb13raw, newdata = b13_unknown)
+
+predspecb13.df <- as.data.frame(predspecb13)
+
+ldapredb13 <- predict(ldab13raw, newdata = predspecb13.df)
+
+ldapredb13$class
+
+#t16 raw
+
+t16_unknown <- travouillon2016[c(which(antechinusdata$Population=="?")),]
+
+predspect16 <- predict(PCAt16raw, newdata = t16_unknown)
+
+predspect16.df <- as.data.frame(predspect16)
+
+ldapredt16 <- predict(ldat16raw, newdata = predspect16.df)
+
+ldapredt16$class
+
+#getting maximum posterior probabilities for each specimen
+
+vd00postdf <- as.data.frame(ldapredvd00$posterior)
+
+vd00postdf$max <- apply(X = vd00postdf, MARGIN = 1, FUN = max)*100
+
+vd00postdf$maxround <- as.factor(round(vd00postdf$max, digits = 2))
+
+d98postdf <- as.data.frame(ldapredd98$posterior)
+
+d98postdf$max <- apply(X = d98postdf, MARGIN = 1, FUN = max)*100
+
+d98postdf$maxround <- as.factor(round(d98postdf$max, digits = 2))
+
+b13postdf <- as.data.frame(ldapredb13$posterior)
+
+b13postdf$max <- apply(X = b13postdf, MARGIN = 1, FUN = max)*100
+
+b13postdf$maxround <- as.factor(round(b13postdf$max, digits = 2))
+
+t16postdf <- as.data.frame(ldapredt16$posterior)
+
+t16postdf$max <- apply(X = t16postdf, MARGIN = 1, FUN = max)*100
+
+t16postdf$maxround <- as.factor(round(t16postdf$max, digits = 2))
+
+#GMM RAW
+
+#PCA of raw GMM data (unscaled or partial Procrustes superimposition) for all specimens
+
+gpapprocall <- ProcGPA(A_reorder, scale = FALSE)
+
+PCAgmmrawall <- gm.prcomp(gpapprocall$rotated)
+
+summary(PCAgmmrawall)
+
+#extraction of unknown specimens for lda model
+
+PCgmmrawpop <- data.frame(PCAgmmrawall$x[-c(which(antechinusdata$Population=="?")),1:23])
+
+PCgmmrawpop$Population <- antechinusdatapop$Population
+
+ldagmmrawpop <- lda(Population~., data = PCgmmrawpop, prior = c(1,1,1)/3)
+
+ldsgmmrawpop <- predict(ldagmmrawpop)
+
+#prediction of unknown specimens
+
+PCgmmrawunknown <- data.frame(PCAgmmrawall$x[c(which(antechinusdata$Population=="?")),1:23])
+
+ldapredgmmraw <- predict(ldagmmrawpop, newdata = PCgmmrawunknown)
+
+gmmrawpostdf <- as.data.frame(ldapredgmmraw$posterior)
+
+gmmrawpostdf$max <- apply(X = gmmrawpostdf, MARGIN = 1, FUN = max)*100
+
+gmmrawpostdf$maxround <- as.factor(round(gmmrawpostdf$max, digits = 2))
+
+
+#building the table
+
+matrix_rawpred <- matrix(c(ldapredvd00$class, vd00postdf$maxround, ldapredd98$class,d98postdf$maxround, ldapredb13$class, b13postdf$maxround, ldapredt16$class, t16postdf$maxround, ldapredgmmraw$class, gmmrawpostdf$maxround), ncol = 10, byrow = FALSE)
+
+colnames(matrix_rawpred) <- c("vd00", "vd00 (%)", "d98", "d98 (%)", "b13", "b13 (%)", "t16", "t16 (%)", "gmm", "gmm (%)")
+
+rownames(matrix_rawpred) <- rownames(vd00_unknown)
+
+table_rawpred <- as.table(matrix_rawpred)
+
+plot(table_rawpred)
+
+
 
 ```
